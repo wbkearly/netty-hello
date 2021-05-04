@@ -79,6 +79,37 @@ public class HelloServer {
        }
    }
    ```
-  2. 为ServerBootstrap添加初始化器
-   
-   ` serverBootstrap.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class).childHandler(null);`
+
+    2. 为ServerBootstrap添加初始化器
+  
+   `serverBootstrap.xxxx.xxxx.childHandler(new HelloServerInitializer());`
+
+    3. 编写自定义助手类初始化器
+
+    ```java
+    public class CustomHandler extends SimpleChannelInboundHandler<HttpObject> {
+
+        /**
+         * 从缓冲区读数据
+         */
+        @Override
+        protected void channelRead0(ChannelHandlerContext ctx, HttpObject msg) throws Exception {
+            // 定义发送的数据消息
+            ByteBuf content = Unpooled.copiedBuffer("hello netty", CharsetUtil.UTF_8);
+            // 构建一个HttpResponse
+            FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, content);
+            // 为响应增加数据类型和长度
+            response.headers()
+                    .set(HttpHeaderNames.CONTENT_TYPE, "text/plain");
+            response.headers()
+                    .set(HttpHeaderNames.CONTENT_LENGTH, content.readableBytes());
+            // 把响应刷到客户端
+            ctx.writeAndFlush(response);
+        }
+    }
+
+    ```
+  
+    4. 添加自定义助手类初始化器
+    
+    `pipeline.addLast("customHandler", new CustomHandler());`

@@ -84,7 +84,7 @@ public class HelloServer {
   
    `serverBootstrap.xxxx.xxxx.childHandler(new HelloServerInitializer());`
 
-    3. 编写自定义助手类初始化器
+    3. 编写自定义助手类
 
     ```java
     public class CustomHandler extends SimpleChannelInboundHandler<HttpObject> {
@@ -112,6 +112,6 @@ public class HelloServer {
 
     ```
   
-    4. 添加自定义助手类初始化器
+    4. 添加自定义助手类
     
     `pipeline.addLast("customHandler", new CustomHandler());`

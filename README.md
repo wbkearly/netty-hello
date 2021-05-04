@@ -15,6 +15,18 @@
 ```
 ### 构建hello服务器
 
+*  步骤
+   
+    1. 构建一对主从线程组
+       
+    2. 定义服务器启动类（Bootstrap）
+    
+    3. 为服务器设置Channel 
+   
+    4. 设置处理从线程池的助手类初始化器(类似拦截器)
+
+    5. 监听启动和关闭服务器
+    
 ```java
 public class HelloServer {
 
@@ -45,3 +57,28 @@ public class HelloServer {
     }
 }
 ```
+
+* 每个channel由多个handler共同组成管道（pipeline）
+
+   1. 编写初始化器
+   
+   ```java
+   public class HelloServerInitializer extends ChannelInitializer<SocketChannel> {
+   
+       @Override
+       protected void initChannel(SocketChannel channel) throws Exception {
+           // 通过channel获取对应的Pipeline
+           ChannelPipeline pipeline = channel.pipeline();
+           // 通过管道添加Handler
+           // HttpServerCodec是 Netty 自己提供的助手类 可以理解为拦截器
+           // 当请求到服务器，需要做解码 响应到客户端 需要做编码
+           pipeline.addLast("HttpServerCodec", new HttpServerCodec());
+   
+           // TODO 添加自定义的助手类 返回 hello netty
+           pipeline.addLast("customHandler", null);
+       }
+   }
+   ```
+  2. 为ServerBootstrap添加初始化器
+   
+   ` serverBootstrap.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class).childHandler(null);`
